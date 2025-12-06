@@ -1,0 +1,303 @@
+# Tax Calculator API Design
+
+## Base URL
+
+```
+https://api.taxcalculator.com/v1
+```
+
+## Authentication
+
+All endpoints except `/auth/register` and `/auth/login` require authentication via Bearer token in the Authorization header:
+
+```
+Authorization: Bearer <token>
+```
+
+---
+
+## Endpoints
+
+### 1. Calculate Tax
+
+**POST** `/calculate`
+
+Calculate tax based on income and tax parameters.
+
+**Headers:**
+
+- `Authorization: Bearer <token>`
+- `Content-Type: application/json`
+
+**Request Body:**
+
+```json
+{
+  "income": 75000,
+  "filingStatus": "single",
+  "taxYear": 2024,
+  "deductions": {
+    "standard": true,
+    "itemized": []
+  },
+  "credits": []
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "grossIncome": 75000,
+    "taxableIncome": 61400,
+    "totalTax": 9328.5,
+    "effectiveRate": 12.44,
+    "marginalRate": 22,
+    "breakdown": [
+      {
+        "bracket": "10%",
+        "income": 11600,
+        "tax": 1160
+      },
+      {
+        "bracket": "12%",
+        "income": 35550,
+        "tax": 4266
+      },
+      {
+        "bracket": "22%",
+        "income": 14250,
+        "tax": 3135
+      }
+    ],
+    "deductions": 13600,
+    "credits": 0
+  }
+}
+```
+
+**Error Response (400 Bad Request):**
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_INPUT",
+    "message": "Income must be a positive number"
+  }
+}
+```
+
+---
+
+### 2. Register User
+
+**POST** `/auth/register`
+
+Create a new user account.
+
+**Headers:**
+
+- `Content-Type: application/json`
+
+**Request Body:**
+
+```json
+{
+  "email": "user@example.com",
+  "password": "SecurePass123!",
+  "firstName": "John",
+  "lastName": "Doe"
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "userId": "usr_1234567890",
+    "email": "user@example.com",
+    "firstName": "John",
+    "lastName": "Doe",
+    "createdAt": "2024-12-02T10:30:00Z"
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+}
+```
+
+**Error Response (409 Conflict):**
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "EMAIL_EXISTS",
+    "message": "An account with this email already exists"
+  }
+}
+```
+
+---
+
+### 3. Login User
+
+**POST** `/auth/login`
+
+Authenticate user and receive access token.
+
+**Headers:**
+
+- `Content-Type: application/json`
+
+**Request Body:**
+
+```json
+{
+  "email": "user@example.com",
+  "password": "SecurePass123!"
+}
+```
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "userId": "usr_1234567890",
+    "email": "user@example.com",
+    "firstName": "John",
+    "lastName": "Doe"
+  },
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "expiresIn": 86400
+}
+```
+
+**Error Response (401 Unauthorized):**
+
+```json
+{
+  "success": false,
+  "error": {
+    "code": "INVALID_CREDENTIALS",
+    "message": "Invalid email or password"
+  }
+}
+```
+
+---
+
+## Additional Suggested Endpoints
+
+### 4. Get User Profile
+
+**GET** `/user/profile`
+
+Retrieve authenticated user's profile information.
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "userId": "usr_1234567890",
+    "email": "user@example.com",
+    "firstName": "John",
+    "lastName": "Doe",
+    "createdAt": "2024-12-02T10:30:00Z"
+  }
+}
+```
+
+---
+
+### 5. Save Tax Calculation
+
+**POST** `/calculations/save`
+
+Save a tax calculation for future reference.
+
+**Request Body:**
+
+```json
+{
+  "name": "2024 Tax Estimate",
+  "calculationData": {
+    "income": 75000,
+    "filingStatus": "single",
+    "taxYear": 2024
+  }
+}
+```
+
+**Response (201 Created):**
+
+```json
+{
+  "success": true,
+  "data": {
+    "calculationId": "calc_9876543210",
+    "name": "2024 Tax Estimate",
+    "savedAt": "2024-12-02T11:00:00Z"
+  }
+}
+```
+
+---
+
+### 6. Get Saved Calculations
+
+**GET** `/calculations`
+
+Retrieve all saved calculations for authenticated user.
+
+**Response (200 OK):**
+
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "calculationId": "calc_9876543210",
+      "name": "2024 Tax Estimate",
+      "taxYear": 2024,
+      "savedAt": "2024-12-02T11:00:00Z"
+    }
+  ]
+}
+```
+
+---
+
+## Field Definitions
+
+### Filing Status Options
+
+- `single`
+- `married_filing_jointly`
+- `married_filing_separately`
+- `head_of_household`
+- `qualifying_widow`
+
+### Tax Year
+
+- Must be between 2020-2025
+
+---
+
+## Error Codes
+
+| Code                  | Description                             |
+| --------------------- | --------------------------------------- |
+| `INVALID_INPUT`       | Request validation failed               |
+| `UNAUTHORIZED`        | Missing or invalid authentication token |
+| `EMAIL_EXISTS`        | Email already registered                |
+| `INVALID_CREDENTIALS` | Login failed                            |
+| `NOT_FOUND`           | Requested resource not found            |
+| `SERVER_ERROR`        | Internal server error                   |
