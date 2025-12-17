@@ -1,0 +1,44 @@
+.calc-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 30px;
+}
+
+.form-container {
+  width: 50%;
+  margin: auto;
+  margin-top: 40px;
+}
+
+.form-label {
+  font-size: 1.4rem;
+  font-weight: bold;
+  /* color: #971c1c; */
+}
+
+.form-input {
+  padding: 10px;
+  font-size: 1.2rem;
+  border: 2px solid #8ca0ff;
+  border-radius: 5px;
+}
+
+.result-container {
+  width: 50%;
+  margin: auto;
+  margin-top: 20px;
+  padding: 20px;
+  border: solid #8ca0ff 2px;
+  border-radius: 8px;
+}
+
+.submit-btn {
+  padding: 10px;
+  font-size: 1.4rem;
+  background-color: #8ca0ff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
