@@ -1,6 +1,6 @@
 import express from "express";
 import bodyParser from "body-parser";
-import dotenv from "dotenv";
+import cors from "cors";
 import authRoutes from "./src/routes/authRoutes.js";
 import userRoutes from "./src/routes/userRoutes.js";
 import taxCalculationRoutes from "./src/routes/taxCalculationRoutes.js";
@@ -10,6 +10,7 @@ const PORT = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 app.use(express.json());
+app.use(cors());
 
 app.use("/v1/auth", authRoutes);
 app.use("/v1/user", userRoutes);
